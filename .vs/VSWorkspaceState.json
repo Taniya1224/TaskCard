@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\.next",
+    "\\.next\\dev",
+    "\\.next\\types",
+    "\\app",
+    "\\public"
+  ],
+  "SelectedNode": "\\.next\\dev",
+  "PreviewInSolutionExplorer": false
+}
