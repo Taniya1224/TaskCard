@@ -1,6 +1,6 @@
 "use client";
 
-import react from "react";
+import React from "react";
 import {
   Card,
   CardContent,
@@ -10,11 +10,15 @@ import {
   Stack,
   Box,
   IconButton,
+  Menu,
+  MenuItem,
+  ListItemIcon,
+  ListItemText,
 } from "@mui/material";
 
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
-import { deepPurple, pink, indigo, teal, amber } from "@mui/material/colors";
+import MoreVertIcon from "@mui/icons-material/MoreVert";
 
 interface TaskCardProps {
   id: string;
@@ -26,7 +30,10 @@ interface TaskCardProps {
   dueDate: Date;
   onEdit?: (id: string) => void;
   onDelete?: (id: string) => void;
-  onStatusChange?: (id: string, status: string) => void;
+  onStatusChange?: (
+    id: string,
+    status: "todo" | "in-progress" | "completed"
+  ) => void;
 }
 
 export default function TaskCard({
@@ -41,23 +48,11 @@ export default function TaskCard({
   onDelete,
   onStatusChange,
 }: TaskCardProps) {
-
   const priorityColors = {
     low: "green",
     medium: "orange",
     high: "red",
   };
-
-  const avatarColors = [
-    "#8e44ad", // purple
-    "#2980b9", // blue
-    "#c0392b", // red
-    "#16a085", // teal
-    "#d35400", // orange
-  ];
-
-  const colorIndex =
-  assignee.name.charCodeAt(0) % avatarColors.length;
 
   const statusColors = {
     todo: "gray",
@@ -65,10 +60,41 @@ export default function TaskCard({
     completed: "green",
   };
 
+  const avatarColors = ["#8e44ad", "#2980b9", "#c0392b", "#16a085", "#d35400"];
+  const colorIndex = assignee.name.charCodeAt(0) % avatarColors.length;
+
+  /* EDIT MENU */
+  const [editAnchor, setEditAnchor] = React.useState<null | HTMLElement>(null);
+  const editOpen = Boolean(editAnchor);
+  const openEditMenu = (event: React.MouseEvent<HTMLButtonElement>) =>
+    setEditAnchor(event.currentTarget);
+  const closeEditMenu = () => setEditAnchor(null);
+
+  /* STATUS MENU */
+  const [statusAnchor, setStatusAnchor] = React.useState<null | HTMLElement>(
+    null
+  );
+  const statusOpen = Boolean(statusAnchor);
+  const openStatusMenu = (event: React.MouseEvent<HTMLDivElement>) =>
+    setStatusAnchor(event.currentTarget);
+  const closeStatusMenu = () => setStatusAnchor(null);
+  const changeStatus = (val: "todo" | "in-progress" | "completed") => {
+    onStatusChange && onStatusChange(id, val);
+    closeStatusMenu();
+  };
+
+  /* PRIORITY MENU */
+  const [priorityAnchor, setPriorityAnchor] =
+    React.useState<null | HTMLElement>(null);
+  const priorityOpen = Boolean(priorityAnchor);
+  const openPriorityMenu = (event: React.MouseEvent<HTMLDivElement>) =>
+    setPriorityAnchor(event.currentTarget);
+  const closePriorityMenu = () => setPriorityAnchor(null);
+
   return (
     <Card
       sx={{
-        maxWidth: 500,
+        width: 900, 
         p: 2,
         m: 2,
         boxShadow: 3,
@@ -81,48 +107,115 @@ export default function TaskCard({
       }}
     >
       <CardContent>
-        <Box sx={{ display: "flex", justifyContent: "flex-end" }}>
-          <IconButton color="success" onClick={() => onEdit && onEdit(id)}>
-            <EditIcon />
-          </IconButton>
-          <IconButton color="error" onClick={() => onDelete && onDelete(id)}>
-            <DeleteIcon />
+        {/* TOP ROW: TITLE + MENU */}
+        <Box sx={{ display: "flex", justifyContent: "space-between" }}>
+          <Typography variant="h6">{title}</Typography>
+          <IconButton onClick={openEditMenu}>
+            <MoreVertIcon />
           </IconButton>
         </Box>
 
-        <Typography variant="h6" gutterBottom>
-          {title}
-        </Typography>
+        <Menu anchorEl={editAnchor} open={editOpen} onClose={closeEditMenu}>
+          <MenuItem
+            onClick={() => {
+              closeEditMenu();
+              onEdit && onEdit(id);
+            }}
+          >
+            <ListItemIcon>
+              <EditIcon sx={{ color: "green" }} />
+            </ListItemIcon>
+            <ListItemText primary="Edit" />
+          </MenuItem>
+          <MenuItem
+            onClick={() => {
+              closeEditMenu();
+              onDelete && onDelete(id);
+            }}
+          >
+            <ListItemIcon>
+              <DeleteIcon sx={{ color: "red" }} />
+            </ListItemIcon>
+            <ListItemText primary="Delete" />
+          </MenuItem>
+        </Menu>
 
-        <Typography variant="body2" color="text.secondary">
+        {/* DESCRIPTION */}
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
           {desc}
         </Typography>
 
-        <Chip
-          label={priority.toUpperCase()}
-          sx={{ bgcolor: priorityColors[priority], color: "white", mt: 1 }}
-        />
+        {/* BOTTOM ROW: PRIORITY + STATUS (LEFT) | ASSIGNEE + DUE DATE (RIGHT) */}
+        <Box
+          sx={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            mt: 2,
+          }}
+        >
+          {/* LEFT SIDE: PRIORITY + STATUS */}
+          <Box sx={{ display: "flex", gap: 1 }}>
+            <Chip
+              label={priority.toUpperCase()}
+              onClick={openPriorityMenu}
+              sx={{
+                bgcolor: priorityColors[priority],
+                color: "white",
+                cursor: "pointer",
+                "&:hover": { transform: "scale(1.05)" },
+                transition: "0.2s",
+              }}
+            />
+            <Menu
+              anchorEl={priorityAnchor}
+              open={priorityOpen}
+              onClose={closePriorityMenu}
+            >
+              {(["low", "medium", "high"] as const).map((p) => (
+                <MenuItem key={p} onClick={closePriorityMenu}>
+                  {p.toUpperCase()}
+                </MenuItem>
+              ))}
+            </Menu>
 
-        <Stack direction="row" alignItems="center" spacing={1} mt={1}>
-          <Avatar
-            sx={{
-              bgcolor: avatarColors[colorIndex],
-              color: "white",
-            }}
-          >
-            {assignee.name[0]}
-          </Avatar>
-          <Typography variant="body2">{assignee.name}</Typography>
-        </Stack>
+            <Chip
+              label={status.toUpperCase()}
+              onClick={openStatusMenu}
+              sx={{
+                bgcolor: statusColors[status],
+                color: "white",
+                cursor: "pointer",
+                "&:hover": { transform: "scale(1.05)" },
+                transition: "0.2s",
+              }}
+            />
+            <Menu
+              anchorEl={statusAnchor}
+              open={statusOpen}
+              onClose={closeStatusMenu}
+            >
+              {(["todo", "in-progress", "completed"] as const).map((s) => (
+                <MenuItem key={s} onClick={() => changeStatus(s)}>
+                  {s.toUpperCase()}
+                </MenuItem>
+              ))}
+            </Menu>
+          </Box>
 
-        <Typography variant="body2" color="text.secondary" mt={1}>
-          Due: {dueDate.toDateString()}
-        </Typography>
-
-        <Chip
-          label={status.toUpperCase()}
-          sx={{ bgcolor: statusColors[status], color: "white", mt: 1 }}
-        />
+          {/* RIGHT SIDE: ASSIGNEE + DUE DATE */}
+          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+            <Stack direction="row" spacing={1} alignItems="center">
+              <Avatar sx={{ bgcolor: avatarColors[colorIndex], color: "white" }}>
+                {assignee.name[0]}
+              </Avatar>
+              <Typography variant="body2">{assignee.name}</Typography>
+            </Stack>
+            <Typography variant="body2" color="text.secondary">
+              Due: {dueDate.toDateString()}
+            </Typography>
+          </Box>
+        </Box>
       </CardContent>
     </Card>
   );

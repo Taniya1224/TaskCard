@@ -1,10 +1,11 @@
 "use client";
 
+import React from "react";
 import TaskCard from "./components/molecules/TaskCard";
 import { Box, Typography, Grid } from "@mui/material";
 
 export default function Home() {
-  const tasks = [
+  const [tasks, setTasks] = React.useState([
     {
       id: "1",
       title: "Finish Homework",
@@ -68,7 +69,13 @@ export default function Home() {
       assignee: { name: "Jin" },
       dueDate: new Date("2025-12-04"),
     },
-  ];
+  ]);
+
+  const handleStatusChange = (id: string, newStatus: "todo" | "in-progress" | "completed") => {
+    setTasks((prev) =>
+      prev.map((task) => (task.id === id ? { ...task, status: newStatus } : task))
+    );
+  };
 
   return (
     <Box sx={{ p: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -78,10 +85,8 @@ export default function Home() {
 
       <Grid container spacing={2} justifyContent="center">
         {tasks.map((task) => (
-          <Grid item key={task.id}>
-            <Box sx={{ width: 340, height: 320 }}>
-              <TaskCard {...task} />
-            </Box>
+          <Grid item key={task.id} xs={12} sm={12} md={8}>
+            <TaskCard {...task} onStatusChange={handleStatusChange} />
           </Grid>
         ))}
       </Grid>
