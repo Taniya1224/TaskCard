@@ -34,6 +34,10 @@ interface TaskCardProps {
     id: string,
     status: "todo" | "in-progress" | "completed"
   ) => void;
+  onPriorityChange?: (
+    id: string,
+    priority: "low" | "medium" | "high"
+  ) => void; 
 }
 
 export default function TaskCard({
@@ -47,6 +51,7 @@ export default function TaskCard({
   onEdit,
   onDelete,
   onStatusChange,
+  onPriorityChange, 
 }: TaskCardProps) {
   const priorityColors = {
     low: "green",
@@ -78,6 +83,7 @@ export default function TaskCard({
   const openStatusMenu = (event: React.MouseEvent<HTMLDivElement>) =>
     setStatusAnchor(event.currentTarget);
   const closeStatusMenu = () => setStatusAnchor(null);
+
   const changeStatus = (val: "todo" | "in-progress" | "completed") => {
     onStatusChange && onStatusChange(id, val);
     closeStatusMenu();
@@ -91,10 +97,15 @@ export default function TaskCard({
     setPriorityAnchor(event.currentTarget);
   const closePriorityMenu = () => setPriorityAnchor(null);
 
+  const changePriority = (val: "low" | "medium" | "high") => {
+    onPriorityChange && onPriorityChange(id, val); 
+    closePriorityMenu();
+  };
+
   return (
     <Card
       sx={{
-        width: 900, 
+        width: 900,
         p: 2,
         m: 2,
         boxShadow: 3,
@@ -127,6 +138,7 @@ export default function TaskCard({
             </ListItemIcon>
             <ListItemText primary="Edit" />
           </MenuItem>
+
           <MenuItem
             onClick={() => {
               closeEditMenu();
@@ -141,11 +153,15 @@ export default function TaskCard({
         </Menu>
 
         {/* DESCRIPTION */}
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 2 }}>
+        <Typography
+          variant="body2"
+          color="text.secondary"
+          sx={{ mt: 1, mb: 2 }}
+        >
           {desc}
         </Typography>
 
-        {/* BOTTOM ROW: PRIORITY + STATUS (LEFT) | ASSIGNEE + DUE DATE (RIGHT) */}
+        {/* BOTTOM ROW */}
         <Box
           sx={{
             display: "flex",
@@ -156,6 +172,7 @@ export default function TaskCard({
         >
           {/* LEFT SIDE: PRIORITY + STATUS */}
           <Box sx={{ display: "flex", gap: 1 }}>
+            {/* PRIORITY CHIP */}
             <Chip
               label={priority.toUpperCase()}
               onClick={openPriorityMenu}
@@ -163,22 +180,24 @@ export default function TaskCard({
                 bgcolor: priorityColors[priority],
                 color: "white",
                 cursor: "pointer",
-                "&:hover": { transform: "scale(1.05)" },
+                "&:hover": { transform: "scale(1.05)", bgcolor: "#2D2D2D" },
                 transition: "0.2s",
               }}
             />
+
             <Menu
               anchorEl={priorityAnchor}
               open={priorityOpen}
               onClose={closePriorityMenu}
             >
               {(["low", "medium", "high"] as const).map((p) => (
-                <MenuItem key={p} onClick={closePriorityMenu}>
+                <MenuItem key={p} onClick={() => changePriority(p)}>
                   {p.toUpperCase()}
                 </MenuItem>
               ))}
             </Menu>
 
+            {/* STATUS CHIP */}
             <Chip
               label={status.toUpperCase()}
               onClick={openStatusMenu}
@@ -186,10 +205,11 @@ export default function TaskCard({
                 bgcolor: statusColors[status],
                 color: "white",
                 cursor: "pointer",
-                "&:hover": { transform: "scale(1.05)" },
+                "&:hover": { transform: "scale(1.05)", bgcolor: "#2D2D2D" },
                 transition: "0.2s",
               }}
             />
+
             <Menu
               anchorEl={statusAnchor}
               open={statusOpen}
@@ -204,13 +224,22 @@ export default function TaskCard({
           </Box>
 
           {/* RIGHT SIDE: ASSIGNEE + DUE DATE */}
-          <Box sx={{ display: "flex", flexDirection: "column", alignItems: "flex-end" }}>
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "flex-end",
+            }}
+          >
             <Stack direction="row" spacing={1} alignItems="center">
-              <Avatar sx={{ bgcolor: avatarColors[colorIndex], color: "white" }}>
+              <Avatar
+                sx={{ bgcolor: avatarColors[colorIndex], color: "white" }}
+              >
                 {assignee.name[0]}
               </Avatar>
               <Typography variant="body2">{assignee.name}</Typography>
             </Stack>
+
             <Typography variant="body2" color="text.secondary">
               Due: {dueDate.toDateString()}
             </Typography>

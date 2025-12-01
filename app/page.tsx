@@ -12,7 +12,7 @@ export default function Home() {
       desc: "Complete math exercises by tonight",
       priority: "high",
       status: "completed",
-      assignee: { name: "Tae" },
+      assignee: { name: "Kim Tae" },
       dueDate: new Date("2025-11-28"),
     },
     {
@@ -30,7 +30,7 @@ export default function Home() {
       desc: "Finish Stranger Things season 5",
       priority: "medium",
       status: "in-progress",
-      assignee: { name: "Jung Kook" },
+      assignee: { name: "Kookie" },
       dueDate: new Date("2025-11-30"),
     },
     {
@@ -39,7 +39,7 @@ export default function Home() {
       desc: "Ask about weekend plans",
       priority: "high",
       status: "todo",
-      assignee: { name: "Jimin" },
+      assignee: { name: "Mochi" },
       dueDate: new Date("2025-12-01"),
     },
     {
@@ -57,7 +57,7 @@ export default function Home() {
       desc: "Electricity and internet bills",
       priority: "high",
       status: "todo",
-      assignee: { name: "RM" },
+      assignee: { name: "Kim Nam" },
       dueDate: new Date("2025-12-03"),
     },
     {
@@ -66,19 +66,42 @@ export default function Home() {
       desc: "Evening walk in the park",
       priority: "low",
       status: "in-progress",
-      assignee: { name: "Jin" },
+      assignee: { name: "Seok Jin" },
       dueDate: new Date("2025-12-04"),
     },
   ]);
 
-  const handleStatusChange = (id: string, newStatus: "todo" | "in-progress" | "completed") => {
+  const handleStatusChange = (
+    id: string,
+    newStatus: "todo" | "in-progress" | "completed"
+  ) => {
     setTasks((prev) =>
-      prev.map((task) => (task.id === id ? { ...task, status: newStatus } : task))
+      prev.map((task) =>
+        task.id === id ? { ...task, status: newStatus } : task
+      )
+    );
+  };
+
+  const handlePriorityChange = (
+    id: string,
+    newPriority: "low" | "medium" | "high"
+  ) => {
+    setTasks((prev) =>
+      prev.map((task) =>
+        task.id === id ? { ...task, priority: newPriority } : task
+      )
     );
   };
 
   return (
-    <Box sx={{ p: 4, display: "flex", flexDirection: "column", alignItems: "center" }}>
+    <Box
+      sx={{
+        p: 4,
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+      }}
+    >
       <Typography variant="h4" sx={{ mb: 3 }}>
         Task Cards
       </Typography>
@@ -86,7 +109,11 @@ export default function Home() {
       <Grid container spacing={2} justifyContent="center">
         {tasks.map((task) => (
           <Grid item key={task.id} xs={12} sm={12} md={8}>
-            <TaskCard {...task} onStatusChange={handleStatusChange} />
+            <TaskCard
+              {...task}
+              onStatusChange={handleStatusChange}
+              onPriorityChange={handlePriorityChange}
+            />
           </Grid>
         ))}
       </Grid>
